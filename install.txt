@@ -1,0 +1,27 @@
+npm install -g typescript
+npm init -y
+tsc --init
+npm install express mongoose body-parser
+npm install nodemon
+npm install ts-node --save-dev
+npm install --save-dev @types/node @types/express @types/mongoose
+npm install dotenv
+
+===========build============
+tsc
+node dist/app.js
+
+"scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "tsc": "tsc",
+    "build": "npx tsc",
+    "start": "nodemon src/app.ts"
+  }
+
+============= mongo compass settings=========
+1. Check IP Whitelist on MongoDB Atlas
+Log in to your MongoDB Atlas account.
+Navigate to Network Access under the Security section.
+Add your current IP address by clicking Add IP Address and selecting Allow Access from Anywhere (0.0.0.0/0) or specifying your current IP.
+Save the changes and wait for them to propagate (usually a few seconds).
+
