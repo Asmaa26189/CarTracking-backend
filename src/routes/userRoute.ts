@@ -1,5 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import User from '../models/user';
+import carTracking from '../models/carTracking';
 
 const router: Router = Router();
 
@@ -24,18 +25,32 @@ router.get('/', async (req: Request, res: Response) => {
   }
 });
 
+// Get By ID 
+router.get('/:id', async (req: Request, res: Response) => {
+  try {
+    const users = await User.findById(req.params.id);
+    if(!users)
+    {
+      res.status(400).json({error: 'Cannot find this user'});
+    }
+    res.status(200).send(users);
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
+
 // Delete 
 router.delete('/:id', async (req: Request, res: Response, next: NextFunction): Promise<void> =>  {
   const userId = req.params.id;
 
   try {
 
-    //const isReferenced = await carTracking.exists({ user: userId });
+    const isReferenced = await carTracking.exists({ user: userId });
 
-    // if (isReferenced) {
-    //   res.status(400).json({error: 'Cannot delete ,it is referenced in other documents.',});
-    //   return;
-    // }
+    if (isReferenced) {
+      res.status(400).json({error: 'Cannot delete ,it is referenced in other documents.',});
+      return;
+    }
 
     
     const deletedUser = await User.findByIdAndDelete(userId);
