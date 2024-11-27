@@ -19,10 +19,10 @@ app.use(bodyParser.json());
 connectDB();
 
 // Routes
-app.use('/api', userRoute);
-app.use('/api', carRoute);
-app.use('/api', carTrackingRoute);
-app.use('/api', ownerRoute);
+app.use('/api/user', userRoute);
+app.use('/api/car', carRoute);
+app.use('/api/tracking', carTrackingRoute);
+app.use('/api/owner', ownerRoute);
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

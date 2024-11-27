@@ -41,7 +41,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 // Get By USERID 
 router.get('/user/:id', async (req: Request, res: Response) => {
     try {
-      const CarTrackings = await CarTracking.findById({userId:req.params.id});
+      const CarTrackings = await CarTracking.find({userId:req.params.id});
       if(!CarTrackings)
       {
         res.status(400).json({error: 'Cannot find this CarTracking'});
@@ -55,7 +55,7 @@ router.get('/user/:id', async (req: Request, res: Response) => {
 // Get By CARID 
 router.get('/car/:id', async (req: Request, res: Response) => {
     try {
-      const CarTrackings = await CarTracking.findById({carId:req.params.id});
+      const CarTrackings = await CarTracking.find({carId:req.params.id});
       if(!CarTrackings)
       {
         res.status(400).json({error: 'Cannot find this CarTracking'});
@@ -70,7 +70,7 @@ router.get('/car/:id', async (req: Request, res: Response) => {
 router.get('/carUser', async (req: Request, res: Response) => {
     try {
         const { carId, userId } = req.query;
-      const CarTrackings = await CarTracking.findById({carId:carId, userId:userId});
+      const CarTrackings = await CarTracking.find({carId:carId, userId:userId});
       if(!CarTrackings)
       {
         res.status(400).json({error: 'Cannot find this CarTracking'});

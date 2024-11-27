@@ -4,7 +4,7 @@ import jwt, { Secret } from 'jsonwebtoken';
 
 dotenv.config();
 
-const tokenAuthentication = (
+const tokenAuth = (
   req: Request,
   res: Response,
   next: NextFunction
@@ -14,7 +14,8 @@ const tokenAuthentication = (
     const tokenSecret = process.env.TOKEN_SECRET as Secret;
     const authorizationHeader = req.headers.authorization as string;
     const token = authorizationHeader.split(' ')[1];
-    jwt.verify(token, tokenSecret);
+    const decoded = jwt.verify(token, tokenSecret);
+    req.body.user = decoded
     return next();
   } catch (err) {
     res.status(401);
@@ -22,4 +23,4 @@ const tokenAuthentication = (
   }
 };
 
-export default tokenAuthentication;
+export default tokenAuth;

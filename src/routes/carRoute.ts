@@ -39,6 +39,20 @@ router.get('/:id', async (req: Request, res: Response) => {
   }
 });
 
+// Get By ID 
+router.get('/owner/:id', async (req: Request, res: Response) => {
+  try {
+    const Cars = await Car.find({'ownerId': req.params.id});
+    if(!Cars)
+    {
+      res.status(400).json({error: 'Cannot find this Car'});
+    }
+    res.status(200).send(Cars);
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
+
 // Delete 
 router.delete('/:id', async (req: Request, res: Response, next: NextFunction): Promise<void> =>  {
   const CarId = req.params.id;
