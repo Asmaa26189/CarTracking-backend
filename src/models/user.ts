@@ -44,3 +44,4 @@ UserSchema.methods.comparePassword = async function (candidatePassword: string):
 };
 
 
+export default model<IUser>('User', UserSchema);
