@@ -1,0 +1,5 @@
+{ "version": 2,
+"builds": [{ "src": "/app.ts", "use": "@vercel/nodemon" }],
+"routes": [{ "src": "/(.*)", "dest":"/app.js"}]
+
+}
