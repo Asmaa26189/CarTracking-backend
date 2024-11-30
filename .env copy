@@ -1,0 +1,4 @@
+PORT = 5001
+MONGODB_URL=mongodb+srv://nubaauto5:nubaauto5@trackingcars.r7qxt.mongodb.net/?retryWrites=true&w=majority&appName=TrackingCars
+TOKEN_SECRET=nubaauto5
+SALT_ROUNDS=12
