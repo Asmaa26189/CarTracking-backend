@@ -2,18 +2,20 @@
   "version": 2,
   "builds": [
     {
-      "src": "dist/app.js",
+      "src": "dist/routes/user/index.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "dist/routes/car/index.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "dist/routes/owner/index.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "dist/routes/carTracking/index.js",
       "use": "@vercel/node"
     }
-  ],
-    "routes": [
-      { "src": "/api/user", "dest": "dist/routes/user/index.js" },
-      { "src": "/api/user/(.*)", "dest": "dist/routes/user/[id].js" },
-      { "src": "/api/car", "dest": "dist/routes/car/index.js" },
-      { "src": "/api/car/(.*)", "dest": "dist/routes/car/[id].js" },
-      { "src": "/api/owner", "dest": "dist/routes/owner/index.js" },
-      { "src": "/api/owner/(.*)", "dest": "dist/routes/owner/[id].js" },
-      { "src": "/api/tracking", "dest": "dist/routes/carTracking/index.js" },
-      { "src": "/api/tracking/(.*)", "dest": "dist/routes/carTracking/[id].js" }
-    ]
+  ]
 }
