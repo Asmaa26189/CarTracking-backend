@@ -8,6 +8,7 @@ const body_parser_1 = __importDefault(require("body-parser"));
 const connectDB_1 = __importDefault(require("./connectDB"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const cors_1 = __importDefault(require("cors"));
+const carRoutes_1 = __importDefault(require("./routes/carRoutes"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT;
@@ -22,6 +23,7 @@ app.use('/api/user', require('./routes/user').default);
 app.use('/api/car', require('./routes/car').default);
 app.use('/api/tracking', require('./routes/carTracking').default);
 app.use('/api/owner', require('./routes/owner').default);
+app.use('/car', carRoutes_1.default);
 app.use((req, res) => {
     res.status(404).json({ success: false, message: 'Route not found' });
 });
