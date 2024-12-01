@@ -8,9 +8,16 @@
     "dev": "npx nodemon src/app.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "tsc": "tsc",
-    "build": "npx tsc",
-    "copy-html": "copy src\\index.html dist\\index.html"
+    "build": "rimraf dist && tsc",
+    "copy-html": "copy src\\index.html dist\\index.html",
+    "ts.check": "tsc --project tsconfig.json",
+    "add-build": "git add dist"
   },
+  "pre-commit": [
+    "ts.check",
+    "build",
+    "add-build"
+  ],
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -21,7 +28,9 @@
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.8.2"
+    "mongoose": "^8.8.2",
+    "pre-commit": "^1.2.2",
+    "rimraf": "^6.0.1"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
