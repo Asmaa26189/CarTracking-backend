@@ -1,4 +1,4 @@
-import express, { Application } from 'express';
+import express, { Application, Request, Response } from 'express';
 import bodyParser from 'body-parser';
 import connectDB from './connectDB';
 import dotenv from 'dotenv';
@@ -23,7 +23,7 @@ app.use('/api/car', require('./routes/car').default);
 app.use('/api/tracking', require('./routes/carTracking').default);
 app.use('/api/owner', require('./routes/owner').default);
 
-app.use((req, res) => {
+app.use((req:Request, res:Response) => {
   res.status(404).json({ success: false, message: 'Route not found' });
 });
 
