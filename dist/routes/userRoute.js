@@ -16,11 +16,32 @@ const express_1 = require("express");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const dotenv_1 = __importDefault(require("dotenv"));
-const user_1 = __importDefault(require("../../models/user"));
-const carTracking_1 = __importDefault(require("../../models/carTracking"));
-const tokenAuth_1 = __importDefault(require("../../middlewares/tokenAuth"));
+const user_1 = __importDefault(require("../models/user"));
+const carTracking_1 = __importDefault(require("../models/carTracking"));
+const tokenAuth_1 = __importDefault(require("../middlewares/tokenAuth"));
 const router = (0, express_1.Router)();
 dotenv_1.default.config();
+// post
+router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const newUser = new user_1.default(req.body);
+        const savedUser = yield newUser.save();
+        res.status(201).send(savedUser);
+    }
+    catch (err) {
+        res.status(500).send(err);
+    }
+}));
+// Get all 
+router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const users = yield user_1.default.find({});
+        res.status(200).send(users);
+    }
+    catch (err) {
+        res.status(500).send(err);
+    }
+}));
 // Get By ID 
 router.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -118,4 +139,4 @@ router.post('/profile', tokenAuth_1.default, (req, res) => __awaiter(void 0, voi
     }
 }));
 exports.default = router;
-//# sourceMappingURL=%5Bid%5D.js.map
+//# sourceMappingURL=userRoute.js.map

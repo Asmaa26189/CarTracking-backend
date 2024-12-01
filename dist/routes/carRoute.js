@@ -13,9 +13,30 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const car_1 = __importDefault(require("../../models/car"));
-const carTracking_1 = __importDefault(require("../../models/carTracking"));
+const car_1 = __importDefault(require("../models/car"));
+const carTracking_1 = __importDefault(require("../models/carTracking"));
 const router = (0, express_1.Router)();
+// post
+router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const newCar = new car_1.default(req.body);
+        const savedCar = yield newCar.save();
+        res.status(201).send(savedCar);
+    }
+    catch (err) {
+        res.status(500).send(err);
+    }
+}));
+// Get all 
+router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const Cars = yield car_1.default.find({});
+        res.status(200).send(Cars);
+    }
+    catch (err) {
+        res.status(500).send(err);
+    }
+}));
 // Get By ID 
 router.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -29,19 +50,19 @@ router.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         res.status(500).send(err);
     }
 }));
-//   // Get By ID 
-//   router.get('/owner/:id', async (req: Request, res: Response) => {
-//     try {
-//       const Cars = await Car.find({'ownerId': req.params.id});
-//       if(!Cars)
-//       {
-//         res.status(400).json({error: 'Cannot find this Car'});
-//       }
-//       res.status(200).send(Cars);
-//     } catch (err) {
-//       res.status(500).send(err);
-//     }
-//   });
+// Get By ID 
+router.get('/owner/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const Cars = yield car_1.default.find({ 'ownerId': req.params.id });
+        if (!Cars) {
+            res.status(400).json({ error: 'Cannot find this Car' });
+        }
+        res.status(200).send(Cars);
+    }
+    catch (err) {
+        res.status(500).send(err);
+    }
+}));
 // Delete 
 router.delete('/:id', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const CarId = req.params.id;
@@ -64,4 +85,4 @@ router.delete('/:id', (req, res, next) => __awaiter(void 0, void 0, void 0, func
     }
 }));
 exports.default = router;
-//# sourceMappingURL=%5Bid%5D.js.map
+//# sourceMappingURL=carRoute.js.map
