@@ -1,9 +1,5 @@
 import express, { Application } from 'express';
 import bodyParser from 'body-parser';
-import userRoute from './routes/userRoute';
-import carRoute from './routes/carRoute';
-import carTrackingRoute from './routes/carTrackingRoute';
-import ownerRoute from './routes/ownerRoute';
 import connectDB from './connectDB';
 import dotenv from 'dotenv';
 import cors from 'cors';
@@ -22,10 +18,10 @@ app.use(cors());
 connectDB();
 
 // Routes
-app.use('/api/user', userRoute);
-app.use('/api/car', carRoute);
-app.use('/api/tracking', carTrackingRoute);
-app.use('/api/owner', ownerRoute);
+app.use('/api/user', require('./routes/user').default);
+app.use('/api/car', require('./routes/car').default);
+app.use('/api/tracking', require('./routes/carTracking').default);
+app.use('/api/owner', require('./routes/owner').default);
 
 app.use((req, res) => {
   res.status(404).json({ success: false, message: 'Route not found' });
