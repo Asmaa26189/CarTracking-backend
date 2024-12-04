@@ -8,6 +8,7 @@ export interface IOwner {
 const OwnerSchema: Schema = new Schema({
   name: {type: String,required: true},
   phone: {type: String,required: true},
+  notes: {type: String },
 });
 
 
