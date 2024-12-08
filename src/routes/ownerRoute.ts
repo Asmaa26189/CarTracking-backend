@@ -15,6 +15,25 @@ router.post('/', async (req: Request, res: Response) => {
   }
 });
 
+// put
+router.put('/:id', async (req: Request, res: Response):Promise<void> => {
+  try {
+    const existingOwner =  await Owner.findById(req.params.id);
+    if (!existingOwner)
+    {
+      res.status(404).json({'error':'Owner not found'});
+      return;
+    }
+    existingOwner.name = req.body.name || existingOwner.name;
+    existingOwner.phone = req.body.phone || existingOwner.phone;
+    existingOwner.notes = req.body.notes || existingOwner.notes;
+
+    const updatedOwner = await existingOwner.save();
+    res.status(201).send(existingOwner);
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
 // Get all 
 router.get('/', async (req: Request, res: Response) => {
   try {

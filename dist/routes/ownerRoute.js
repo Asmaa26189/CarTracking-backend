@@ -27,6 +27,24 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.status(500).send(err);
     }
 }));
+// put
+router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const existingOwner = yield owner_1.default.findById(req.params.id);
+        if (!existingOwner) {
+            res.status(404).json({ 'error': 'Owner not found' });
+            return;
+        }
+        existingOwner.name = req.body.name || existingOwner.name;
+        existingOwner.phone = req.body.phone || existingOwner.phone;
+        existingOwner.notes = req.body.notes || existingOwner.notes;
+        const updatedOwner = yield existingOwner.save();
+        res.status(201).send(existingOwner);
+    }
+    catch (err) {
+        res.status(500).send(err);
+    }
+}));
 // Get all 
 router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
