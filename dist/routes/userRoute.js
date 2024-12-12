@@ -55,6 +55,23 @@ router.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         res.status(500).send(err);
     }
 }));
+// validate password
+router.post('/validate-password', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { email, password } = req.body;
+        const user = yield user_1.default.findOne({ email });
+        if (!user) {
+            res.status(404).send('User not found');
+            return;
+        }
+        const isValid = yield bcrypt_1.default.compare(password, user.password);
+        res.status(200).json({ isValid });
+    }
+    catch (error) {
+        console.error('Error validating password:', error);
+        res.status(500).send('Server error');
+    }
+}));
 // Delete 
 router.delete('/:id', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const userId = req.params.id;
