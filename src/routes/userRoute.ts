@@ -45,6 +45,28 @@ router.get('/:id', async (req: Request, res: Response) => {
   }
 });
 
+
+// validate password
+router.post('/validate-password', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      res.status(404).send('User not found');
+      return;
+    }
+    const isValid = await bcrypt.compare(password, user.password);
+
+    res.status(200).json({ isValid });
+  } catch (error) {
+    console.error('Error validating password:', error);
+    res.status(500).send('Server error');
+  }
+});
+
+
 // Delete 
 router.delete('/:id', async (req: Request, res: Response, next: NextFunction): Promise<void> =>  {
   const userId = req.params.id;
