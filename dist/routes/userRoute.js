@@ -72,6 +72,27 @@ router.post('/validate-password', (req, res) => __awaiter(void 0, void 0, void 0
         res.status(500).send('Server error');
     }
 }));
+//update
+router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userId = req.params.id;
+        const updates = req.body;
+        if (updates.password) {
+            const salt = yield bcrypt_1.default.genSalt(10);
+            updates.password = yield bcrypt_1.default.hash(updates.password, salt);
+        }
+        const updatedUser = yield user_1.default.findByIdAndUpdate(userId, { $set: updates }, { new: true, runValidators: true });
+        if (!updatedUser) {
+            res.status(404).json({ error: 'User not found' });
+            return;
+        }
+        res.status(200).json(updatedUser);
+    }
+    catch (error) {
+        console.error('Error updating user:', error);
+        res.status(500).send('Server error');
+    }
+}));
 // Delete 
 router.delete('/:id', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const userId = req.params.id;

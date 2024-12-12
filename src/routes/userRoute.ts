@@ -66,6 +66,35 @@ router.post('/validate-password', async (req: Request, res: Response): Promise<v
   }
 });
 
+//update
+router.put('/:id', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.params.id;
+    const updates = req.body;
+    if (updates.password) {
+      const salt = await bcrypt.genSalt(10);
+      updates.password = await bcrypt.hash(updates.password, salt);
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: updates },
+      { new: true, runValidators: true } 
+    );
+
+    if (!updatedUser) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error('Error updating user:', error);
+    res.status(500).send('Server error');
+  }
+});
+
+
 
 // Delete 
 router.delete('/:id', async (req: Request, res: Response, next: NextFunction): Promise<void> =>  {
