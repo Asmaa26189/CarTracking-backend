@@ -71,16 +71,24 @@ router.put('/:id', async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = req.params.id;
     const updates = req.body;
+
+    const existingUser =  await User.findById(req.params.id);
+        if (!existingUser)
+        {
+          res.status(404).json({'error':'Owner not found'});
+          return;
+        }
     if (updates.password) {
       const salt = await bcrypt.genSalt(10);
       updates.password = await bcrypt.hash(updates.password, salt);
     }
 
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      { $set: updates },
-      { new: true, runValidators: true } 
-    );
+    existingUser.name = updates.name || existingUser.name;
+    existingUser.email = updates.email || existingUser.email;
+    existingUser.type = updates.type || existingUser.type;
+    existingUser.password = updates.password || existingUser.password;
+
+    const updatedUser = await existingUser.save();
 
     if (!updatedUser) {
       res.status(404).json({ error: 'User not found' });

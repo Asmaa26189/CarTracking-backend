@@ -77,11 +77,20 @@ router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     try {
         const userId = req.params.id;
         const updates = req.body;
+        const existingUser = yield user_1.default.findById(req.params.id);
+        if (!existingUser) {
+            res.status(404).json({ 'error': 'Owner not found' });
+            return;
+        }
         if (updates.password) {
             const salt = yield bcrypt_1.default.genSalt(10);
             updates.password = yield bcrypt_1.default.hash(updates.password, salt);
         }
-        const updatedUser = yield user_1.default.findByIdAndUpdate(userId, { $set: updates }, { new: true, runValidators: true });
+        existingUser.name = updates.name || existingUser.name;
+        existingUser.email = updates.email || existingUser.email;
+        existingUser.type = updates.type || existingUser.type;
+        existingUser.password = updates.password || existingUser.password;
+        const updatedUser = yield existingUser.save();
         if (!updatedUser) {
             res.status(404).json({ error: 'User not found' });
             return;
