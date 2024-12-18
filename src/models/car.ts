@@ -15,6 +15,7 @@ const CarSchema: Schema = new Schema({
   type: {type: String,required: true},
   description: {type: String,required: false},
   ownerId: {type: mongoose.Schema.Types.ObjectId,ref: 'Owner',required: true},
+  date: {type: Date,required: true,default: Date.now},
 });
 
 export default model<ICar>('Car', CarSchema);
