@@ -28,7 +28,7 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 }));
 // put
-router.post('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const existingCar = yield car_1.default.findById(req.params.id);
         if (!existingCar) {

@@ -16,7 +16,7 @@ router.post('/', async (req: Request, res: Response) => {
 });
 
 // put
-router.post('/:id', async (req: Request, res: Response) :Promise<void>=> {
+router.put('/:id', async (req: Request, res: Response) :Promise<void>=> {
   try {
     const existingCar=  await Car.findById(req.params.id);
     if (!existingCar)
