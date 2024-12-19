@@ -18,7 +18,7 @@ router.post('/', async (req: Request, res: Response) => {
 // Get all 
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const Cars = await Car.find({}).populate('Owner');
+    const Cars = await Car.find({}).populate('ownerId');
     res.status(200).send(Cars);
   } catch (err) {
     res.status(500).send(err);
@@ -29,9 +29,8 @@ router.get('/', async (req: Request, res: Response) => {
 router.get('/:id', async (req: Request, res: Response) => {
   try {
     const Cars = await Car.findById(req.params.id);
-    if(!Cars)
-    {
-      res.status(400).json({error: 'Cannot find this Car'});
+    if (!Cars) {
+      res.status(400).json({ error: 'Cannot find this Car' });
     }
     res.status(200).send(Cars);
   } catch (err) {
@@ -42,10 +41,9 @@ router.get('/:id', async (req: Request, res: Response) => {
 // Get By ID 
 router.get('/owner/:id', async (req: Request, res: Response) => {
   try {
-    const Cars = await Car.find({'ownerId': req.params.id});
-    if(!Cars)
-    {
-      res.status(400).json({error: 'Cannot find this Car'});
+    const Cars = await Car.find({ 'ownerId': req.params.id });
+    if (!Cars) {
+      res.status(400).json({ error: 'Cannot find this Car' });
     }
     res.status(200).send(Cars);
   } catch (err) {
@@ -54,7 +52,7 @@ router.get('/owner/:id', async (req: Request, res: Response) => {
 });
 
 // Delete 
-router.delete('/:id', async (req: Request, res: Response, next: NextFunction): Promise<void> =>  {
+router.delete('/:id', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const CarId = req.params.id;
 
   try {
@@ -62,11 +60,11 @@ router.delete('/:id', async (req: Request, res: Response, next: NextFunction): P
     const isReferenced = await CarTracking.exists({ carId: CarId });
 
     if (isReferenced) {
-      res.status(400).json({error: 'Cannot delete ,it is referenced in other documents.',});
+      res.status(400).json({ error: 'Cannot delete ,it is referenced in other documents.', });
       return;
     }
 
-    
+
     const deletedCar = await Car.findByIdAndDelete(CarId);
 
     if (!deletedCar) {
@@ -77,7 +75,7 @@ router.delete('/:id', async (req: Request, res: Response, next: NextFunction): P
     res.status(200).json({ message: 'Car deleted successfully' });
   } catch (err: any) {
     console.error('Error deleting Car:', err);
-    next(err); 
+    next(err);
   }
 });
 
