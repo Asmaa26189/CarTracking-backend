@@ -15,6 +15,28 @@ router.post('/', async (req: Request, res: Response) => {
   }
 });
 
+// put
+router.post('/:id', async (req: Request, res: Response) :Promise<void>=> {
+  try {
+    const existingCar=  await Car.findById(req.params.id);
+    if (!existingCar)
+    {
+      res.status(404).json({'error':'Car not found'});
+      return;
+    }
+    existingCar.code = req.body.code || existingCar.code;
+    existingCar.type = req.body.type || existingCar.type;
+    existingCar.description = req.body.description || existingCar.description;
+    existingCar.date = req.body.date || existingCar.date;
+    existingCar.ownerId = req.body.ownerId || existingCar.ownerId;
+
+    const updatedOwner = await existingCar.save();
+    res.status(201).send(existingCar);
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
+
 // Get all 
 router.get('/', async (req: Request, res: Response) => {
   try {

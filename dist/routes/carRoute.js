@@ -27,6 +27,26 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.status(500).send(err);
     }
 }));
+// put
+router.post('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const existingCar = yield car_1.default.findById(req.params.id);
+        if (!existingCar) {
+            res.status(404).json({ 'error': 'Car not found' });
+            return;
+        }
+        existingCar.code = req.body.code || existingCar.code;
+        existingCar.type = req.body.type || existingCar.type;
+        existingCar.description = req.body.description || existingCar.description;
+        existingCar.date = req.body.date || existingCar.date;
+        existingCar.ownerId = req.body.ownerId || existingCar.ownerId;
+        const updatedOwner = yield existingCar.save();
+        res.status(201).send(existingCar);
+    }
+    catch (err) {
+        res.status(500).send(err);
+    }
+}));
 // Get all 
 router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
