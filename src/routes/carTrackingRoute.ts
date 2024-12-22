@@ -17,7 +17,11 @@ router.post('/', async (req: Request, res: Response) => {
 // Get all 
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const CarTrackings = await CarTracking.find({});
+    const CarTrackings = await CarTracking.find({})
+      .populate('userId')  
+      .populate('ownerId') 
+      .populate('carId');  
+
     res.status(200).send(CarTrackings);
   } catch (err) {
     res.status(500).send(err);

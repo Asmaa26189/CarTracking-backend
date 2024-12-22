@@ -29,7 +29,10 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 // Get all 
 router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const CarTrackings = yield carTracking_1.default.find({});
+        const CarTrackings = yield carTracking_1.default.find({})
+            .populate('userId')
+            .populate('ownerId')
+            .populate('carId');
         res.status(200).send(CarTrackings);
     }
     catch (err) {
