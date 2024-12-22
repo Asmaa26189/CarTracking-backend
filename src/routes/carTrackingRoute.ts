@@ -52,6 +52,20 @@ router.get('/user/:id', async (req: Request, res: Response) => {
     }
   });
 
+  // Get By OWNERID 
+router.get('/owner/:id', async (req: Request, res: Response) => {
+  try {
+    const CarTrackings = await CarTracking.find({ownerId:req.params.id});
+    if(!CarTrackings)
+    {
+      res.status(400).json({error: 'Cannot find this CarTracking'});
+    }
+    res.status(200).send(CarTrackings);
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
+
 // Get By CARID 
 router.get('/car/:id', async (req: Request, res: Response) => {
     try {
@@ -76,6 +90,29 @@ router.get('/carUser', async (req: Request, res: Response) => {
         res.status(400).json({error: 'Cannot find this CarTracking'});
       }
       res.status(200).send(CarTrackings);
+    } catch (err) {
+      res.status(500).send(err);
+    }
+  });
+
+
+  // put
+  router.put('/:id', async (req: Request, res: Response) :Promise<void>=> {
+    try {
+      const existingCar=  await CarTracking.findById(req.params.id);
+      if (!existingCar)
+      {
+        res.status(404).json({'error':'Car not found'});
+        return;
+      }
+      existingCar.userId = req.body.userId || existingCar.userId;
+      existingCar.ownerId = req.body.ownerId || existingCar.ownerId;
+      existingCar.carId = req.body.carId || existingCar.carId;
+      existingCar.date = req.body.date || existingCar.date;
+      existingCar.notes = req.body.note || existingCar.notes;
+  
+      const updatedOwner = await existingCar.save();
+      res.status(201).send(existingCar);
     } catch (err) {
       res.status(500).send(err);
     }

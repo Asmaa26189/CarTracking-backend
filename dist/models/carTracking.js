@@ -35,8 +35,9 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const CarTrackingSchema = new mongoose_1.Schema({
-    userId: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'Owner', required: true },
+    ownerId: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'Owner', required: true },
     carId: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'Car', required: true },
+    userId: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'User', required: false },
     notes: { type: String, required: false },
     date: { type: Date, required: true, default: Date.now },
 });
