@@ -17,10 +17,7 @@ router.post('/', async (req: Request, res: Response) => {
 // Get all 
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const CarTrackings = await CarTracking.find({})
-      .populate('userId')  
-      .populate('ownerId') 
-      .populate('carId');  
+    const CarTrackings = await CarTracking.find({}).populate('userId').populate('carId');  
 
     res.status(200).send(CarTrackings);
   } catch (err) {
@@ -57,18 +54,18 @@ router.get('/user/:id', async (req: Request, res: Response) => {
   });
 
   // Get By OWNERID 
-router.get('/owner/:id', async (req: Request, res: Response) => {
-  try {
-    const CarTrackings = await CarTracking.find({ownerId:req.params.id});
-    if(!CarTrackings)
-    {
-      res.status(400).json({error: 'Cannot find this CarTracking'});
-    }
-    res.status(200).send(CarTrackings);
-  } catch (err) {
-    res.status(500).send(err);
-  }
-});
+// router.get('/owner/:id', async (req: Request, res: Response) => {
+//   try {
+//     const CarTrackings = await CarTracking.find({ownerId:req.params.id});
+//     if(!CarTrackings)
+//     {
+//       res.status(400).json({error: 'Cannot find this CarTracking'});
+//     }
+//     res.status(200).send(CarTrackings);
+//   } catch (err) {
+//     res.status(500).send(err);
+//   }
+// });
 
 // Get By CARID 
 router.get('/car/:id', async (req: Request, res: Response) => {
@@ -109,11 +106,8 @@ router.get('/carUser', async (req: Request, res: Response) => {
         res.status(404).json({'error':'Car not found'});
         return;
       }
-      existingCar.userId = req.body.userId || existingCar.userId;
-      existingCar.ownerId = req.body.ownerId || existingCar.ownerId;
       existingCar.carId = req.body.carId || existingCar.carId;
-      existingCar.date = req.body.date || existingCar.date;
-      existingCar.notes = req.body.note || existingCar.notes;
+      existingCar.notes = req.body.notes || existingCar.notes;
   
       const updatedOwner = await existingCar.save();
       res.status(201).send(existingCar);

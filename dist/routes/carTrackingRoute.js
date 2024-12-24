@@ -29,10 +29,7 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 // Get all 
 router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const CarTrackings = yield carTracking_1.default.find({})
-            .populate('userId')
-            .populate('ownerId')
-            .populate('carId');
+        const CarTrackings = yield carTracking_1.default.find({}).populate('userId').populate('carId');
         res.status(200).send(CarTrackings);
     }
     catch (err) {
@@ -66,18 +63,18 @@ router.get('/user/:id', (req, res) => __awaiter(void 0, void 0, void 0, function
     }
 }));
 // Get By OWNERID 
-router.get('/owner/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const CarTrackings = yield carTracking_1.default.find({ ownerId: req.params.id });
-        if (!CarTrackings) {
-            res.status(400).json({ error: 'Cannot find this CarTracking' });
-        }
-        res.status(200).send(CarTrackings);
-    }
-    catch (err) {
-        res.status(500).send(err);
-    }
-}));
+// router.get('/owner/:id', async (req: Request, res: Response) => {
+//   try {
+//     const CarTrackings = await CarTracking.find({ownerId:req.params.id});
+//     if(!CarTrackings)
+//     {
+//       res.status(400).json({error: 'Cannot find this CarTracking'});
+//     }
+//     res.status(200).send(CarTrackings);
+//   } catch (err) {
+//     res.status(500).send(err);
+//   }
+// });
 // Get By CARID 
 router.get('/car/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -113,11 +110,8 @@ router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             res.status(404).json({ 'error': 'Car not found' });
             return;
         }
-        existingCar.userId = req.body.userId || existingCar.userId;
-        existingCar.ownerId = req.body.ownerId || existingCar.ownerId;
         existingCar.carId = req.body.carId || existingCar.carId;
-        existingCar.date = req.body.date || existingCar.date;
-        existingCar.notes = req.body.note || existingCar.notes;
+        existingCar.notes = req.body.notes || existingCar.notes;
         const updatedOwner = yield existingCar.save();
         res.status(201).send(existingCar);
     }
