@@ -18,11 +18,20 @@ dotenv_1.default.config();
 // Connect to MongoDB
 const connectDB = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        if (!process.env.MONGODB_URL) {
-            throw new Error('MONGODB_URL is not defined');
+        if (process.env.TYPE == 'test') {
+            if (!process.env.MONGODB_URL) {
+                throw new Error('MONGODB_URL is not defined');
+            }
+            yield mongoose_1.default.connect(process.env.MONGODB_URL);
+            console.log('Connected to MongoDB');
         }
-        yield mongoose_1.default.connect(process.env.MONGODB_URL);
-        console.log('Connected to MongoDB');
+        else {
+            if (!process.env.MONGODB_URL_PRO) {
+                throw new Error('MONGODB_URL_Pro is not defined');
+            }
+            yield mongoose_1.default.connect(process.env.MONGODB_URL_PRO);
+            console.log('Connected to MongoDB');
+        }
     }
     catch (err) {
         console.error('Could not connect to MongoDB:', err);
