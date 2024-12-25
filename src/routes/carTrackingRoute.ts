@@ -17,7 +17,15 @@ router.post('/', async (req: Request, res: Response) => {
 // Get all 
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const CarTrackings = await CarTracking.find({}).populate('userId').populate('carId');  
+    const CarTrackings = await CarTracking.find({})
+    .populate('userId')
+    .populate({
+      path: 'carId',
+      populate: {
+        path: 'ownerId', // Populate the ownerId from the Car model
+        select: 'name', // Select only the owner's name
+      },
+    }); 
 
     res.status(200).send(CarTrackings);
   } catch (err) {

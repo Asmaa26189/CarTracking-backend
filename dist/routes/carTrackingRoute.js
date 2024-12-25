@@ -29,7 +29,15 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 // Get all 
 router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const CarTrackings = yield carTracking_1.default.find({}).populate('userId').populate('carId');
+        const CarTrackings = yield carTracking_1.default.find({})
+            .populate('userId')
+            .populate({
+            path: 'carId',
+            populate: {
+                path: 'ownerId', // Populate the ownerId from the Car model
+                select: 'name', // Select only the owner's name
+            },
+        });
         res.status(200).send(CarTrackings);
     }
     catch (err) {
