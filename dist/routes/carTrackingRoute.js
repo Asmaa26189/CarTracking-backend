@@ -39,7 +39,7 @@ router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 // Get By ID 
 router.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const CarTrackings = yield carTracking_1.default.findById(req.params.id);
+        const CarTrackings = yield carTracking_1.default.findById(req.params.id).populate('carId');
         if (!CarTrackings) {
             res.status(400).json({ error: 'Cannot find this CarTracking' });
         }

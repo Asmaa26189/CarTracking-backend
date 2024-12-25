@@ -28,7 +28,7 @@ router.get('/', async (req: Request, res: Response) => {
 // Get By ID 
 router.get('/:id', async (req: Request, res: Response) => {
   try {
-    const CarTrackings = await CarTracking.findById(req.params.id);
+    const CarTrackings = await CarTracking.findById(req.params.id).populate('carId'); 
     if(!CarTrackings)
     {
       res.status(400).json({error: 'Cannot find this CarTracking'});
