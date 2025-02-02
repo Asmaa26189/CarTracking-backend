@@ -158,9 +158,11 @@ router.post('/login', (req, res) => __awaiter(void 0, void 0, void 0, function* 
             const token = jsonwebtoken_1.default.sign({
                 userId: user._id,
                 type: user.type,
+                name: user.name,
             }, process.env.TOKEN_SECRET, { expiresIn: '1h' });
             res.send({
                 token,
+                name: user.name,
             });
         }
         res.status(401).send('Invalid email or password');

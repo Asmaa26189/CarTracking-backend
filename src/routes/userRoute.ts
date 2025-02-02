@@ -175,6 +175,7 @@ router.post('/login', async (req: Request, res: Response):Promise<void> => {
       {
         userId: user._id,
         type: user.type,
+        name: user.name,
       },
       process.env.TOKEN_SECRET as Secret ,
       { expiresIn: '1h' }
@@ -182,6 +183,7 @@ router.post('/login', async (req: Request, res: Response):Promise<void> => {
 
     res.send({
       token,
+      name: user.name,
     });
   }
   res.status(401).send('Invalid email or password');
