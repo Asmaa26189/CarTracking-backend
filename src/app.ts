@@ -7,6 +7,8 @@ import userRoute from './routes/userRoute';
 import carRoute from './routes/carRoute';
 import carTrackingRoute from './routes/carTrackingRoute';
 import ownerRoute from './routes/ownerRoute';
+import session from "express-session";
+
 
 
 dotenv.config();
@@ -21,6 +23,19 @@ app.use(cors());
 
 // MongoDB Connection
 connectDB();
+
+//session
+// Configure session
+app.use(session({
+  secret: process.env.SESSION_SECRET || "" ,
+  
+  cookie: {
+      maxAge: 1000 * 60 * 60 * 24, // 1 day
+      secure: false, // Set to true if using HTTPS
+      httpOnly: true, // Prevent client-side access
+  }
+}));
+
 
 // Routes
 app.use('/api/user', userRoute);

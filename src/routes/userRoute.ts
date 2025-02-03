@@ -5,6 +5,15 @@ import dotenv from 'dotenv';
 import User from '../models/user';
 import CarTracking from '../models/carTracking';
 import tokenAuth from '../middlewares/tokenAuth';
+import session from "express-session";
+import { promises } from 'dns';
+declare module "express-session" {
+  interface SessionData {
+      userId?: string; // Store userId as ObjectId
+  }
+}
+
+
 
 const router: Router = Router();
 
@@ -94,6 +103,7 @@ router.put('/:id', async (req: Request, res: Response): Promise<void> => {
       res.status(404).json({ error: 'User not found' });
       return;
     }
+    
 
     res.status(200).json(updatedUser);
   } catch (error) {
@@ -157,6 +167,7 @@ router.post('/register', async (req: Request, res: Response):Promise<void> => {
 router.post('/login', async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
+    
 
     const user = await User.findOne({ email });
 
@@ -176,13 +187,26 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
       process.env.TOKEN_SECRET as Secret,
       { expiresIn: '1h' }
     );
-
+     // Store user ID in session
+     if (req.session) {
+      req.session.userId = user._id.toString(); // Convert ObjectId to string
+    }
     res.json({ token });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).send('Server error');
   }
   
+});
+
+router.post("/logout", (req, res) => {
+  req.session.destroy((err) => {
+      if (err) {
+          return res.status(500).json({ message: "Logout failed" });
+      }
+      res.clearCookie("connect.sid"); // Clear session cookie
+      res.json({ message: "Logged out successfully" });
+  });
 });
 
 
