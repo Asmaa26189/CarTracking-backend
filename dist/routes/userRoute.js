@@ -142,28 +142,21 @@ router.post('/register', (req, res) => __awaiter(void 0, void 0, void 0, functio
         res.status(500).send('Server error');
     }
 }));
-// public - Login a user
 router.post('/login', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { email, password } = req.body;
-        // Check if the user exists
         const user = yield user_1.default.findOne({ email });
-        // Compare the entered password with the stored hashed password
-        if (user) {
-            const isMatch = yield bcrypt_1.default.compare(password, user.password);
-            if (!isMatch) {
-                res.status(401).send('Invalid email or password');
-            }
-            // Generate JWT token
-            const token = jsonwebtoken_1.default.sign({
-                userId: user._id,
-                type: user.type,
-            }, process.env.TOKEN_SECRET, { expiresIn: '1h' });
-            res.send({
-                token,
-            });
+        if (!user) {
+            res.status(401).send('Invalid email or password');
+            return;
         }
-        res.status(401).send('Invalid email or password');
+        const isMatch = yield bcrypt_1.default.compare(password, user.password);
+        if (!isMatch) {
+            res.status(401).send('Invalid email or password');
+            return;
+        }
+        const token = jsonwebtoken_1.default.sign({ userId: user._id, type: user.type, name: user.name }, process.env.TOKEN_SECRET, { expiresIn: '1h' });
+        res.json({ token });
     }
     catch (error) {
         console.error('Login error:', error);

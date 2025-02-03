@@ -154,37 +154,30 @@ router.post('/register', async (req: Request, res: Response):Promise<void> => {
   }
 });
 
-// public - Login a user
-router.post('/login', async (req: Request, res: Response):Promise<void> => {
+router.post('/login', async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
 
-    // Check if the user exists
     const user = await User.findOne({ email });
 
-    // Compare the entered password with the stored hashed password
-    if(user){
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
+    if (!user) {
       res.status(401).send('Invalid email or password');
+      return;
     }
 
-    // Generate JWT token
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      res.status(401).send('Invalid email or password');
+      return;
+    }
+
     const token = jwt.sign(
-      {
-        userId: user._id,
-        type: user.type,
-      },
-      process.env.TOKEN_SECRET as Secret ,
+      { userId: user._id, type: user.type ,name: user.name },
+      process.env.TOKEN_SECRET as Secret,
       { expiresIn: '1h' }
     );
 
-    res.send({
-      token,
-    });
-  }
-  res.status(401).send('Invalid email or password');
+    res.json({ token });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).send('Server error');
