@@ -182,6 +182,7 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
     console.error('Login error:', error);
     res.status(500).send('Server error');
   }
+  
 });
 
 
