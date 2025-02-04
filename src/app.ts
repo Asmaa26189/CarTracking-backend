@@ -8,6 +8,7 @@ import carRoute from './routes/carRoute';
 import carTrackingRoute from './routes/carTrackingRoute';
 import ownerRoute from './routes/ownerRoute';
 import session from "express-session";
+// import MongoStore from "connect-mongo";
 
 
 
@@ -26,15 +27,18 @@ connectDB();
 
 //session
 // Configure session
-app.use(session({
-  secret: process.env.SESSION_SECRET || "" ,
-  
-  cookie: {
-      maxAge: 1000 * 60 * 60 * 24, // 1 day
-      secure: false, // Set to true if using HTTPS
-      httpOnly: true, // Prevent client-side access
-  }
-}));
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "your-secret-key",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // Set to true in production
+      maxAge: 1000 * 60 * 60, // 1 hour
+    },
+  })
+);
 
 
 // Routes

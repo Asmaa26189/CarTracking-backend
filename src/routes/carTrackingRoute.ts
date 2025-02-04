@@ -1,6 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import CarTracking from '../models/carTracking';
-
+import session from "express-session";
 const router: Router = Router();
 
 // post
@@ -17,7 +17,23 @@ router.post('/', async (req: Request, res: Response) => {
 // Get all 
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const CarTrackings = await CarTracking.find({})
+    
+    if (req.session) {
+    const userId =  req.session.userId // Convert ObjectId to string
+    const userType = req.session.userType
+    let CarTrackings = null;
+    if(userType === 'Admin'){
+      CarTrackings = await CarTracking.find()
+      .populate('userId')
+      .populate({
+        path: 'carId',
+        populate: {
+          path: 'ownerId', // Populate the ownerId from the Car model
+          select: 'name', // Select only the owner's name
+        },
+      }); 
+    } else{
+    CarTrackings = await CarTracking.find({'userId': userId})
     .populate('userId')
     .populate({
       path: 'carId',
@@ -26,8 +42,9 @@ router.get('/', async (req: Request, res: Response) => {
         select: 'name', // Select only the owner's name
       },
     }); 
-
+  }
     res.status(200).send(CarTrackings);
+  }
   } catch (err) {
     res.status(500).send(err);
   }

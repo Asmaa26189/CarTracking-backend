@@ -10,6 +10,7 @@ import { promises } from 'dns';
 declare module "express-session" {
   interface SessionData {
       userId?: string; // Store userId as ObjectId
+      userType?: string;
   }
 }
 
@@ -189,8 +190,14 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
     );
      // Store user ID in session
      if (req.session) {
-      req.session.userId = user._id.toString(); // Convert ObjectId to string
+      req.session.userId = user._id.toString();
+      req.session.userType = user.type.toString();
     }
+    req.session.save((err) => {
+      if (err) {
+        console.error("Session save error:", err);
+        return res.status(500).json({ message: "Failed to save session" });
+      }});
     res.json({ token });
   } catch (error) {
     console.error('Login error:', error);
