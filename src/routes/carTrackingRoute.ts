@@ -1,6 +1,9 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import CarTracking from '../models/carTracking';
 import User from '../models/user';
+import { saveLog , getTokenFromHeader } from "../utils/logger";
+import tokenAuth from '../middlewares/tokenAuth';
+
 const router: Router = Router();
 
 
@@ -10,6 +13,20 @@ router.post('/', async (req: Request, res: Response) => {
   try {
     const newCarTracking= new CarTracking(req.body);
     const savedCarTracking = await newCarTracking.save();
+
+    const decode = getTokenFromHeader(req);
+    // Log details
+    const type = "insert";
+    const message = `Car with code ${savedCarTracking.carId} has been added`;
+    const userType = decode ? decode.type : 'Guest';
+    const userId = decode ? decode.userId : '';
+    const path = `/carTracking/${savedCarTracking._id}`;
+
+    try {
+      await saveLog(type, message, userType, userId, path);
+    } catch (logError) {
+      console.error("Failed to save log:", logError);
+    }
     res.status(201).send(savedCarTracking);
   } catch (err) {
     res.status(500).send(err);
@@ -154,6 +171,19 @@ router.get('/carUser', async (req: Request, res: Response) => {
       existingCar.notes = req.body.notes || existingCar.notes;
   
       const updatedOwner = await existingCar.save();
+      const decode = getTokenFromHeader(req);
+      // Log details
+      const type = "insert";
+      const message = `Car with code ${updatedOwner.carId} has been added`;
+      const userType = decode ? decode.type : 'Guest';
+      const userId = decode ? decode.userId : '';
+      const path = `/carTracking/${updatedOwner._id}`;
+
+      try {
+        await saveLog(type, message, userType, userId, path);
+      } catch (logError) {
+        console.error("Failed to save log:", logError);
+    }
       res.status(201).send(existingCar);
     } catch (err) {
       res.status(500).send(err);

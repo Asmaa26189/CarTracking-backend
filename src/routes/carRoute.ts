@@ -2,32 +2,18 @@ import { Router, Request, Response, NextFunction } from 'express';
 import mongoose from "mongoose";
 import Car from '../models/car';
 import CarTracking from '../models/carTracking';
-import { saveLog } from "../utils/logger";
+import { saveLog , getTokenFromHeader } from "../utils/logger";
 import tokenAuth from '../middlewares/tokenAuth';
-import jwt, { Secret } from 'jsonwebtoken';
-import dotenv from 'dotenv';
 
 const router: Router = Router();
 
-dotenv.config();
 // Post route to add a new car
 router.post('/', tokenAuth, async (req: Request, res: Response) => {
   try {
     const newCar = new Car(req.body);
     const savedCar = await newCar.save();
 
-    // Decode JWT safely
-    const token = req.headers.authorization?.split(' ')[1];
-    let decode: any = null;
-
-    if (token) {
-      try {
-        decode = jwt.verify(token, process.env.JWT_SECRET as Secret); // Verify instead of decode
-      } catch (err) {
-        res.status(401).json({ error: "Invalid token" });
-      }
-    }
-
+    const decode = getTokenFromHeader(req);
     // Log details
     const type = "insert";
     const message = `Car with code ${newCar.code} has been added`;
@@ -64,6 +50,20 @@ router.put('/:id', tokenAuth, async (req: Request, res: Response): Promise<void>
     existingCar.ownerId = req.body.ownerId || existingCar.ownerId;
 
     const updatedOwner = await existingCar.save();
+    
+    const decode = getTokenFromHeader(req);
+    // Log details
+    const type = "update";
+    const message = `Car with code ${existingCar.code} has been added`;
+    const userType = decode ? decode.type : 'Guest';
+    const userId = decode ? decode.userId : '';
+    const path = `/car/${existingCar._id}`;
+
+    try {
+      await saveLog(type, message, userType, userId, path);
+    } catch (logError) {
+      console.error("Failed to save log:", logError);
+    }
     res.status(201).send(existingCar);
   } catch (err) {
     res.status(500).send(err);
@@ -125,6 +125,20 @@ router.delete('/:id', tokenAuth, async (req: Request, res: Response, next: NextF
     if (!deletedCar) {
       res.status(404).json({ error: 'Car not found' });
       return;
+    }
+    
+    const decode = getTokenFromHeader(req);
+    // Log details
+    const type = "delete";
+    const message = `Car with code ${deletedCar.code} has been added`;
+    const userType = decode ? decode.type : 'Guest';
+    const userId = decode ? decode.userId : '';
+    const path = `/car/${deletedCar._id}`;
+
+    try {
+      await saveLog(type, message, userType, userId, path);
+    } catch (logError) {
+      console.error("Failed to save log:", logError);
     }
 
     res.status(200).json({ message: 'Car deleted successfully' });
