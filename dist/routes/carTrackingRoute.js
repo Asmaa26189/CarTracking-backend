@@ -14,7 +14,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const carTracking_1 = __importDefault(require("../models/carTracking"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const router = (0, express_1.Router)();
+// Middleware to get the user from token
+const getUserFromToken = (req) => {
+    try {
+        const token = req.cookies.authToken; // Ensure cookies are used
+        if (!token)
+            return null;
+        const decoded = jsonwebtoken_1.default.verify(token, process.env.TOKEN_SECRET);
+        return decoded; // Define expected structure
+    }
+    catch (error) {
+        return null;
+    }
+};
 // post
 router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -29,16 +43,39 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 // Get all 
 router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const CarTrackings = yield carTracking_1.default.find({})
-            .populate('userId')
-            .populate({
-            path: 'carId',
-            populate: {
-                path: 'ownerId', // Populate the ownerId from the Car model
-                select: 'name', // Select only the owner's name
-            },
-        });
-        res.status(200).send(CarTrackings);
+        const user = getUserFromToken(req);
+        if (!user) {
+            res.status(401).json({ error: "Unauthorized" });
+        }
+        if (user) {
+            const { userId, type } = user;
+            let CarTrackings = null;
+            if (type === 'Admin') {
+                CarTrackings = yield carTracking_1.default.find()
+                    .populate('userId')
+                    .populate({
+                    path: 'carId',
+                    populate: {
+                        path: 'ownerId', // Populate the ownerId from the Car model
+                        select: 'name', // Select only the owner's name
+                    },
+                });
+            }
+            else {
+                if (userId != '') {
+                    CarTrackings = yield carTracking_1.default.find({ 'userId': userId })
+                        .populate('userId')
+                        .populate({
+                        path: 'carId',
+                        populate: {
+                            path: 'ownerId', // Populate the ownerId from the Car model
+                            select: 'name', // Select only the owner's name
+                        },
+                    });
+                }
+            }
+            res.status(200).send(CarTrackings);
+        }
     }
     catch (err) {
         res.status(500).send(err);

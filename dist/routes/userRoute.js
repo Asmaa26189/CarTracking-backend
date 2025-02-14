@@ -156,6 +156,11 @@ router.post('/login', (req, res) => __awaiter(void 0, void 0, void 0, function* 
             return;
         }
         const token = jsonwebtoken_1.default.sign({ userId: user._id, type: user.type, name: user.name }, process.env.TOKEN_SECRET, { expiresIn: '1h' });
+        // Set cookie
+        res.cookie("authToken", token, {
+            httpOnly: true, // Prevents client-side JS access
+            maxAge: 3600000, // 1 hour
+        });
         res.json({ token });
     }
     catch (error) {
@@ -163,6 +168,10 @@ router.post('/login', (req, res) => __awaiter(void 0, void 0, void 0, function* 
         res.status(500).send('Server error');
     }
 }));
+router.post("/logout", (req, res) => {
+    res.clearCookie("authToken");
+    res.json({ message: "Logged out successfully" });
+});
 // protected - Get user profile
 router.post('/profile', tokenAuth_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {

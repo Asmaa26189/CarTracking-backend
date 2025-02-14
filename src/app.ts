@@ -7,8 +7,7 @@ import userRoute from './routes/userRoute';
 import carRoute from './routes/carRoute';
 import carTrackingRoute from './routes/carTrackingRoute';
 import ownerRoute from './routes/ownerRoute';
-import session from "express-session";
-// import MongoStore from "connect-mongo";
+import logRoute from './routes/logRoutes';
 
 
 
@@ -17,39 +16,29 @@ dotenv.config();
 const app: Application = express();
 const PORT = process.env.PORT;
 
-// Middleware
+//Use JSON body parser before session
 app.use(bodyParser.json());
 app.use(express.json());
-app.use(cors());
+app.use(cors()); // Allow cookies
 
 // MongoDB Connection
 connectDB();
 
-//session
-// Configure session
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || "your-secret-key",
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // Set to true in production
-      maxAge: 1000 * 60 * 60, // 1 hour
-    },
-  })
-);
+app.use((req, res, next) => {
+  next();
+});
 
-
-// Routes
+// Define routes AFTER session middleware
 app.use('/api/user', userRoute);
 app.use('/api/car', carRoute);
 app.use('/api/tracking', carTrackingRoute);
 app.use('/api/owner', ownerRoute);
+app.use('/api/log', logRoute);
 
 app.use((req:Request, res:Response) => {
   res.status(404).json({ success: false, message: 'Route not found' });
 });
+
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

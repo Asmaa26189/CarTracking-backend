@@ -1,7 +1,6 @@
 import mongoose, { Schema, model } from 'mongoose';
 import { IOwner } from './owner';
 
-
 export interface ICar {
   code: string;
   type: string;

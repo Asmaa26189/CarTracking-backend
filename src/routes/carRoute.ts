@@ -1,27 +1,60 @@
 import { Router, Request, Response, NextFunction } from 'express';
+import mongoose from "mongoose";
 import Car from '../models/car';
 import CarTracking from '../models/carTracking';
+import { saveLog } from "../utils/logger";
+import tokenAuth from '../middlewares/tokenAuth';
+import jwt, { Secret } from 'jsonwebtoken';
+import dotenv from 'dotenv';
 
 const router: Router = Router();
 
-// post
-router.post('/', async (req: Request, res: Response) => {
+dotenv.config();
+// Post route to add a new car
+router.post('/', tokenAuth, async (req: Request, res: Response) => {
   try {
     const newCar = new Car(req.body);
     const savedCar = await newCar.save();
-    res.status(201).send(savedCar);
+
+    // Decode JWT safely
+    const token = req.headers.authorization?.split(' ')[1];
+    let decode: any = null;
+
+    if (token) {
+      try {
+        decode = jwt.verify(token, process.env.JWT_SECRET as Secret); // Verify instead of decode
+      } catch (err) {
+        res.status(401).json({ error: "Invalid token" });
+      }
+    }
+
+    // Log details
+    const type = "insert";
+    const message = `Car with code ${newCar.code} has been added`;
+    const userType = decode ? decode.type : 'Guest';
+    const userId = decode ? decode.userId : '';
+    const path = `/car/${newCar._id}`;
+
+    try {
+      await saveLog(type, message, userType, userId, path);
+    } catch (logError) {
+      console.error("Failed to save log:", logError);
+    }
+
+    res.status(201).json(savedCar);
   } catch (err) {
-    res.status(500).send(err);
+    console.error("Error adding car:", err);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
+
 // put
-router.put('/:id', async (req: Request, res: Response) :Promise<void>=> {
+router.put('/:id', tokenAuth, async (req: Request, res: Response): Promise<void> => {
   try {
-    const existingCar=  await Car.findById(req.params.id);
-    if (!existingCar)
-    {
-      res.status(404).json({'error':'Car not found'});
+    const existingCar = await Car.findById(req.params.id);
+    if (!existingCar) {
+      res.status(404).json({ 'error': 'Car not found' });
       return;
     }
     existingCar.code = req.body.code || existingCar.code;
@@ -38,7 +71,7 @@ router.put('/:id', async (req: Request, res: Response) :Promise<void>=> {
 });
 
 // Get all 
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', tokenAuth, async (req: Request, res: Response) => {
   try {
     const Cars = await Car.find({}).populate('ownerId');
     res.status(200).send(Cars);
@@ -48,7 +81,7 @@ router.get('/', async (req: Request, res: Response) => {
 });
 
 // Get By ID 
-router.get('/:id', async (req: Request, res: Response) => {
+router.get('/:id', tokenAuth, async (req: Request, res: Response) => {
   try {
     const Cars = await Car.findById(req.params.id);
     if (!Cars) {
@@ -61,7 +94,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 });
 
 // Get By ID 
-router.get('/owner/:id', async (req: Request, res: Response) => {
+router.get('/owner/:id', tokenAuth, async (req: Request, res: Response) => {
   try {
     const Cars = await Car.find({ 'ownerId': req.params.id });
     if (!Cars) {
@@ -74,7 +107,7 @@ router.get('/owner/:id', async (req: Request, res: Response) => {
 });
 
 // Delete 
-router.delete('/:id', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.delete('/:id', tokenAuth, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const CarId = req.params.id;
 
   try {

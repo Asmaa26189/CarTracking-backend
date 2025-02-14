@@ -1,7 +1,9 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import CarTracking from '../models/carTracking';
-import session from "express-session";
+import User from '../models/user';
 const router: Router = Router();
+
+
 
 // post
 router.post('/', async (req: Request, res: Response) => {
@@ -15,14 +17,22 @@ router.post('/', async (req: Request, res: Response) => {
 });
 
 // Get all 
-router.get('/', async (req: Request, res: Response) => {
+router.get('/:userId', async (req: Request, res: Response) => {
   try {
-    
-    if (req.session) {
-    const userId =  req.session.userId // Convert ObjectId to string
-    const userType = req.session.userType
     let CarTrackings = null;
-    if(userType === 'Admin'){
+    const id = req.params.userId;
+    if(!id){
+      res.status(200).send(CarTrackings);
+    }
+    const user = await User.findById(id);
+    if (!user) {
+      res.status(401).json({ error: "Unauthorized" });
+    }
+    if (user) {
+    const userId = user._id;
+    const type = user.type;
+    
+    if(type === 'Admin'){
       CarTrackings = await CarTracking.find()
       .populate('userId')
       .populate({
@@ -33,15 +43,17 @@ router.get('/', async (req: Request, res: Response) => {
         },
       }); 
     } else{
-    CarTrackings = await CarTracking.find({'userId': userId})
-    .populate('userId')
-    .populate({
-      path: 'carId',
-      populate: {
-        path: 'ownerId', // Populate the ownerId from the Car model
-        select: 'name', // Select only the owner's name
-      },
-    }); 
+      if(userId){
+        CarTrackings = await CarTracking.find({'userId': userId})
+        .populate('userId')
+        .populate({
+          path: 'carId',
+          populate: {
+            path: 'ownerId', // Populate the ownerId from the Car model
+            select: 'name', // Select only the owner's name
+          },
+        }); 
+      }
   }
     res.status(200).send(CarTrackings);
   }
