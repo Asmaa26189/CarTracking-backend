@@ -16,7 +16,7 @@ router.post('/', tokenAuth, async (req: Request, res: Response) => {
     const decode = getTokenFromHeader(req);
     // Log details
     const type = "insert";
-    const message = `Car with code ${newCar.code} has been added`;
+    const message = `${newCar}`;
     const userType = decode ? decode.type : 'Guest';
     const userId = decode ? decode.userId : '';
     const path = `/car/${newCar._id}`;
@@ -43,18 +43,18 @@ router.put('/:id', tokenAuth, async (req: Request, res: Response): Promise<void>
       res.status(404).json({ 'error': 'Car not found' });
       return;
     }
+    const message = `${existingCar} `;
     existingCar.code = req.body.code || existingCar.code;
     existingCar.type = req.body.type || existingCar.type;
     existingCar.description = req.body.description || existingCar.description;
     existingCar.date = req.body.date || existingCar.date;
     existingCar.ownerId = req.body.ownerId || existingCar.ownerId;
 
-    const updatedOwner = await existingCar.save();
+    const updatedCar = await existingCar.save();
     
     const decode = getTokenFromHeader(req);
     // Log details
     const type = "update";
-    const message = `Car with code ${existingCar.code} has been added`;
     const userType = decode ? decode.type : 'Guest';
     const userId = decode ? decode.userId : '';
     const path = `/car/${existingCar._id}`;
@@ -71,7 +71,7 @@ router.put('/:id', tokenAuth, async (req: Request, res: Response): Promise<void>
 });
 
 // Get all 
-router.get('/', tokenAuth, async (req: Request, res: Response) => {
+router.get('/', async (req: Request, res: Response) => {
   try {
     const Cars = await Car.find({}).populate('ownerId');
     res.status(200).send(Cars);
@@ -81,7 +81,7 @@ router.get('/', tokenAuth, async (req: Request, res: Response) => {
 });
 
 // Get By ID 
-router.get('/:id', tokenAuth, async (req: Request, res: Response) => {
+router.get('/:id', async (req: Request, res: Response) => {
   try {
     const Cars = await Car.findById(req.params.id);
     if (!Cars) {
@@ -94,7 +94,7 @@ router.get('/:id', tokenAuth, async (req: Request, res: Response) => {
 });
 
 // Get By ID 
-router.get('/owner/:id', tokenAuth, async (req: Request, res: Response) => {
+router.get('/owner/:id', async (req: Request, res: Response) => {
   try {
     const Cars = await Car.find({ 'ownerId': req.params.id });
     if (!Cars) {
@@ -130,7 +130,7 @@ router.delete('/:id', tokenAuth, async (req: Request, res: Response, next: NextF
     const decode = getTokenFromHeader(req);
     // Log details
     const type = "delete";
-    const message = `Car with code ${deletedCar.code} has been added`;
+    const message = `${deletedCar}`;
     const userType = decode ? decode.type : 'Guest';
     const userId = decode ? decode.userId : '';
     const path = `/car/${deletedCar._id}`;

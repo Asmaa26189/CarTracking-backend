@@ -6,10 +6,8 @@ import tokenAuth from '../middlewares/tokenAuth';
 
 const router: Router = Router();
 
-
-
 // post
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', tokenAuth ,async (req: Request, res: Response) => {
   try {
     const newCarTracking= new CarTracking(req.body);
     const savedCarTracking = await newCarTracking.save();
@@ -17,7 +15,7 @@ router.post('/', async (req: Request, res: Response) => {
     const decode = getTokenFromHeader(req);
     // Log details
     const type = "insert";
-    const message = `Car with code ${savedCarTracking.carId} has been added`;
+    const message = `CarTracking with code ${savedCarTracking.carId} has been added`;
     const userType = decode ? decode.type : 'Guest';
     const userId = decode ? decode.userId : '';
     const path = `/carTracking/${savedCarTracking._id}`;
@@ -159,7 +157,7 @@ router.get('/carUser', async (req: Request, res: Response) => {
 
 
   // put
-  router.put('/:id', async (req: Request, res: Response) :Promise<void>=> {
+  router.put('/:id', tokenAuth, async (req: Request, res: Response) :Promise<void>=> {
     try {
       const existingCar=  await CarTracking.findById(req.params.id);
       if (!existingCar)
@@ -171,10 +169,11 @@ router.get('/carUser', async (req: Request, res: Response) => {
       existingCar.notes = req.body.notes || existingCar.notes;
   
       const updatedOwner = await existingCar.save();
+      
       const decode = getTokenFromHeader(req);
       // Log details
-      const type = "insert";
-      const message = `Car with code ${updatedOwner.carId} has been added`;
+      const type = "update";
+      const message = `CarTracking with code ${updatedOwner.carId} has been added`;
       const userType = decode ? decode.type : 'Guest';
       const userId = decode ? decode.userId : '';
       const path = `/carTracking/${updatedOwner._id}`;
@@ -191,7 +190,7 @@ router.get('/carUser', async (req: Request, res: Response) => {
   });
 
 // Delete 
-router.delete('/:id', async (req: Request, res: Response, next: NextFunction): Promise<void> =>  {
+router.delete('/:id', tokenAuth, async (req: Request, res: Response, next: NextFunction): Promise<void> =>  {
   const CarTrackingId = req.params.id;
 
   try {
@@ -201,6 +200,22 @@ router.delete('/:id', async (req: Request, res: Response, next: NextFunction): P
       res.status(404).json({ error: 'CarTracking not found' });
       return;
     }
+
+    const decode = getTokenFromHeader(req);
+    // Log details
+    const type = "delete";
+    const message = `CarTracking with code ${deletedCarTracking.carId} has been added`;
+    const userType = decode ? decode.type : 'Guest';
+    const userId = decode ? decode.userId : '';
+    const path = `/carTracking/${deletedCarTracking._id}`;
+
+    try {
+      await saveLog(type, message, userType, userId, path);
+    } catch (logError) {
+      console.error("Failed to save log:", logError);
+  }
+
+   
 
     res.status(200).json({ message: 'CarTracking deleted successfully' });
   } catch (err: any) {

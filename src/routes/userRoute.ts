@@ -5,16 +5,31 @@ import dotenv from 'dotenv';
 import User from '../models/user';
 import CarTracking from '../models/carTracking';
 import tokenAuth from '../middlewares/tokenAuth';
+import { saveLog , getTokenFromHeader } from "../utils/logger";
 
 const router: Router = Router();
 
 dotenv.config();
 
 // post
-router.post('/', async (req: Request, res: Response) => {
+router.post('/',tokenAuth ,async (req: Request, res: Response) => {
   try {
     const newUser = new User(req.body);
     const savedUser = await newUser.save();
+    const decode = getTokenFromHeader(req);
+    // Log details
+    const type = "insert";
+    const message = `${newUser}`;
+    const userType = decode ? decode.type : 'Guest';
+    const userId = decode ? decode.userId : '';
+    const path = `/car/${newUser._id}`;
+
+    try {
+      await saveLog(type, message, userType, userId, path);
+    } catch (logError) {
+      console.error("Failed to save log:", logError);
+    }
+
     res.status(201).send(savedUser);
   } catch (err) {
     res.status(500).send(err);
@@ -67,12 +82,13 @@ router.post('/validate-password', async (req: Request, res: Response): Promise<v
 });
 
 //update
-router.put('/:id', async (req: Request, res: Response): Promise<void> => {
+router.put('/:id', tokenAuth ,async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = req.params.id;
     const updates = req.body;
 
     const existingUser =  await User.findById(req.params.id);
+    const message = `${existingUser} `;
         if (!existingUser)
         {
           res.status(404).json({'error':'Owner not found'});
@@ -90,6 +106,19 @@ router.put('/:id', async (req: Request, res: Response): Promise<void> => {
 
     const updatedUser = await existingUser.save();
 
+    const decode = getTokenFromHeader(req);
+    // Log details
+    const type = "update";
+    const userType = decode ? decode.type : 'Guest';
+    const userIdAdd = decode ? decode.userId : '';
+    const path = `/car/${existingUser._id}`;
+
+    try {
+      await saveLog(type, message, userType, userIdAdd, path);
+    } catch (logError) {
+      console.error("Failed to save log:", logError);
+    }
+
     if (!updatedUser) {
       res.status(404).json({ error: 'User not found' });
       return;
@@ -106,7 +135,7 @@ router.put('/:id', async (req: Request, res: Response): Promise<void> => {
 
 
 // Delete 
-router.delete('/:id', async (req: Request, res: Response, next: NextFunction): Promise<void> =>  {
+router.delete('/:id', tokenAuth, async (req: Request, res: Response, next: NextFunction): Promise<void> =>  {
   const userId = req.params.id;
 
   try {
@@ -124,6 +153,19 @@ router.delete('/:id', async (req: Request, res: Response, next: NextFunction): P
     if (!deletedUser) {
       res.status(404).json({ error: 'User not found' });
       return;
+    }
+    const decode = getTokenFromHeader(req);
+    // Log details
+    const type = "delete";
+    const message = `${deletedUser}`;
+    const userType = decode ? decode.type : 'Guest';
+    const userIdAdd = decode ? decode.userId : '';
+    const path = `/car/${deletedUser._id}`;
+
+    try {
+      await saveLog(type, message, userType, userIdAdd, path);
+    } catch (logError) {
+      console.error("Failed to save log:", logError);
     }
 
     res.status(200).json({ message: 'User deleted successfully' });

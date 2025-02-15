@@ -24,7 +24,7 @@ export const getTokenFromHeader = (req: Request): any | null => {
     }
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET as Secret);
+        const decoded = jwt.verify(token, process.env.TOKEN_SECRET as Secret);
         return decoded; // Return decoded payload
     } catch (err) {
         console.error("Error verifying token:", err);
