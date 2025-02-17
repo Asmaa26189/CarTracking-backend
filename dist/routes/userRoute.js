@@ -19,13 +19,27 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const user_1 = __importDefault(require("../models/user"));
 const carTracking_1 = __importDefault(require("../models/carTracking"));
 const tokenAuth_1 = __importDefault(require("../middlewares/tokenAuth"));
+const logger_1 = require("../utils/logger");
 const router = (0, express_1.Router)();
 dotenv_1.default.config();
 // post
-router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.post('/', tokenAuth_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const newUser = new user_1.default(req.body);
         const savedUser = yield newUser.save();
+        const decode = (0, logger_1.getTokenFromHeader)(req);
+        // Log details
+        const type = "insert";
+        const message = `${newUser}`;
+        const userType = decode ? decode.type : 'Guest';
+        const userId = decode ? decode.userId : '';
+        const path = `/car/${newUser._id}`;
+        try {
+            yield (0, logger_1.saveLog)(type, message, userType, userId, path);
+        }
+        catch (logError) {
+            console.error("Failed to save log:", logError);
+        }
         res.status(201).send(savedUser);
     }
     catch (err) {
@@ -73,11 +87,12 @@ router.post('/validate-password', (req, res) => __awaiter(void 0, void 0, void 0
     }
 }));
 //update
-router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.put('/:id', tokenAuth_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userId = req.params.id;
         const updates = req.body;
         const existingUser = yield user_1.default.findById(req.params.id);
+        const message = `${existingUser} `;
         if (!existingUser) {
             res.status(404).json({ 'error': 'Owner not found' });
             return;
@@ -91,6 +106,18 @@ router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         existingUser.type = updates.type || existingUser.type;
         existingUser.password = updates.password || existingUser.password;
         const updatedUser = yield existingUser.save();
+        const decode = (0, logger_1.getTokenFromHeader)(req);
+        // Log details
+        const type = "update";
+        const userType = decode ? decode.type : 'Guest';
+        const userIdAdd = decode ? decode.userId : '';
+        const path = `/car/${existingUser._id}`;
+        try {
+            yield (0, logger_1.saveLog)(type, message, userType, userIdAdd, path);
+        }
+        catch (logError) {
+            console.error("Failed to save log:", logError);
+        }
         if (!updatedUser) {
             res.status(404).json({ error: 'User not found' });
             return;
@@ -103,7 +130,7 @@ router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 }));
 // Delete 
-router.delete('/:id', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.delete('/:id', tokenAuth_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const userId = req.params.id;
     try {
         const isReferenced = yield carTracking_1.default.exists({ userId: userId });
@@ -115,6 +142,19 @@ router.delete('/:id', (req, res, next) => __awaiter(void 0, void 0, void 0, func
         if (!deletedUser) {
             res.status(404).json({ error: 'User not found' });
             return;
+        }
+        const decode = (0, logger_1.getTokenFromHeader)(req);
+        // Log details
+        const type = "delete";
+        const message = `${deletedUser}`;
+        const userType = decode ? decode.type : 'Guest';
+        const userIdAdd = decode ? decode.userId : '';
+        const path = `/car/${deletedUser._id}`;
+        try {
+            yield (0, logger_1.saveLog)(type, message, userType, userIdAdd, path);
+        }
+        catch (logError) {
+            console.error("Failed to save log:", logError);
         }
         res.status(200).json({ message: 'User deleted successfully' });
     }
@@ -143,8 +183,10 @@ router.post('/register', (req, res) => __awaiter(void 0, void 0, void 0, functio
     }
 }));
 router.post('/login', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b;
     try {
-        const { email, password } = req.body;
+        const password = (_a = req.body) === null || _a === void 0 ? void 0 : _a.password;
+        const email = (_b = req.body) === null || _b === void 0 ? void 0 : _b.email.toLowerCase();
         const user = yield user_1.default.findOne({ email });
         if (!user) {
             res.status(401).send('Invalid email or password');
@@ -156,11 +198,6 @@ router.post('/login', (req, res) => __awaiter(void 0, void 0, void 0, function* 
             return;
         }
         const token = jsonwebtoken_1.default.sign({ userId: user._id, type: user.type, name: user.name }, process.env.TOKEN_SECRET, { expiresIn: '1h' });
-        // Set cookie
-        res.cookie("authToken", token, {
-            httpOnly: true, // Prevents client-side JS access
-            maxAge: 3600000, // 1 hour
-        });
         res.json({ token });
     }
     catch (error) {

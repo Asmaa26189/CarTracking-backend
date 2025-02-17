@@ -14,26 +14,28 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const carTracking_1 = __importDefault(require("../models/carTracking"));
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const user_1 = __importDefault(require("../models/user"));
+const logger_1 = require("../utils/logger");
+const tokenAuth_1 = __importDefault(require("../middlewares/tokenAuth"));
 const router = (0, express_1.Router)();
-// Middleware to get the user from token
-const getUserFromToken = (req) => {
-    try {
-        const token = req.cookies.authToken; // Ensure cookies are used
-        if (!token)
-            return null;
-        const decoded = jsonwebtoken_1.default.verify(token, process.env.TOKEN_SECRET);
-        return decoded; // Define expected structure
-    }
-    catch (error) {
-        return null;
-    }
-};
 // post
-router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.post('/', tokenAuth_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const newCarTracking = new carTracking_1.default(req.body);
         const savedCarTracking = yield newCarTracking.save();
+        const decode = (0, logger_1.getTokenFromHeader)(req);
+        // Log details
+        const type = "insert";
+        const message = `CarTracking with code ${savedCarTracking.carId} has been added`;
+        const userType = decode ? decode.type : 'Guest';
+        const userId = decode ? decode.userId : '';
+        const path = `/carTracking/${savedCarTracking._id}`;
+        try {
+            yield (0, logger_1.saveLog)(type, message, userType, userId, path);
+        }
+        catch (logError) {
+            console.error("Failed to save log:", logError);
+        }
         res.status(201).send(savedCarTracking);
     }
     catch (err) {
@@ -41,15 +43,20 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 }));
 // Get all 
-router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.get('/:userId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const user = getUserFromToken(req);
+        let CarTrackings = null;
+        const id = req.params.userId;
+        if (!id) {
+            res.status(200).send(CarTrackings);
+        }
+        const user = yield user_1.default.findById(id);
         if (!user) {
             res.status(401).json({ error: "Unauthorized" });
         }
         if (user) {
-            const { userId, type } = user;
-            let CarTrackings = null;
+            const userId = user._id;
+            const type = user.type;
             if (type === 'Admin') {
                 CarTrackings = yield carTracking_1.default.find()
                     .populate('userId')
@@ -62,7 +69,7 @@ router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 });
             }
             else {
-                if (userId != '') {
+                if (userId) {
                     CarTrackings = yield carTracking_1.default.find({ 'userId': userId })
                         .populate('userId')
                         .populate({
@@ -155,7 +162,7 @@ router.get('/carUser', (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 }));
 // put
-router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.put('/:id', tokenAuth_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const existingCar = yield carTracking_1.default.findById(req.params.id);
         if (!existingCar) {
@@ -165,6 +172,19 @@ router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         existingCar.carId = req.body.carId || existingCar.carId;
         existingCar.notes = req.body.notes || existingCar.notes;
         const updatedOwner = yield existingCar.save();
+        const decode = (0, logger_1.getTokenFromHeader)(req);
+        // Log details
+        const type = "update";
+        const message = `CarTracking with code ${updatedOwner.carId} has been added`;
+        const userType = decode ? decode.type : 'Guest';
+        const userId = decode ? decode.userId : '';
+        const path = `/carTracking/${updatedOwner._id}`;
+        try {
+            yield (0, logger_1.saveLog)(type, message, userType, userId, path);
+        }
+        catch (logError) {
+            console.error("Failed to save log:", logError);
+        }
         res.status(201).send(existingCar);
     }
     catch (err) {
@@ -172,13 +192,26 @@ router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 }));
 // Delete 
-router.delete('/:id', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.delete('/:id', tokenAuth_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const CarTrackingId = req.params.id;
     try {
         const deletedCarTracking = yield carTracking_1.default.findByIdAndDelete(CarTrackingId);
         if (!deletedCarTracking) {
             res.status(404).json({ error: 'CarTracking not found' });
             return;
+        }
+        const decode = (0, logger_1.getTokenFromHeader)(req);
+        // Log details
+        const type = "delete";
+        const message = `CarTracking with code ${deletedCarTracking.carId} has been added`;
+        const userType = decode ? decode.type : 'Guest';
+        const userId = decode ? decode.userId : '';
+        const path = `/carTracking/${deletedCarTracking._id}`;
+        try {
+            yield (0, logger_1.saveLog)(type, message, userType, userId, path);
+        }
+        catch (logError) {
+            console.error("Failed to save log:", logError);
         }
         res.status(200).json({ message: 'CarTracking deleted successfully' });
     }

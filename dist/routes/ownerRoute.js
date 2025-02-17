@@ -15,12 +15,27 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const owner_1 = __importDefault(require("../models/owner"));
 const car_1 = __importDefault(require("../models/car"));
+const logger_1 = require("../utils/logger");
+const tokenAuth_1 = __importDefault(require("../middlewares/tokenAuth"));
 const router = (0, express_1.Router)();
 // post
-router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.post('/', tokenAuth_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const newOwner = new owner_1.default(req.body);
         const savedOwner = yield newOwner.save();
+        const decode = (0, logger_1.getTokenFromHeader)(req);
+        // Log details
+        const type = "insert";
+        const message = `${newOwner}`;
+        const userType = decode ? decode.type : 'Guest';
+        const userId = decode ? decode.userId : '';
+        const path = `/car/${newOwner._id}`;
+        try {
+            yield (0, logger_1.saveLog)(type, message, userType, userId, path);
+        }
+        catch (logError) {
+            console.error("Failed to save log:", logError);
+        }
         res.status(201).send(savedOwner);
     }
     catch (err) {
@@ -28,17 +43,30 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 }));
 // put
-router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.put('/:id', tokenAuth_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const existingOwner = yield owner_1.default.findById(req.params.id);
         if (!existingOwner) {
             res.status(404).json({ 'error': 'Owner not found' });
             return;
         }
+        const message = `${existingOwner} `;
         existingOwner.name = req.body.name || existingOwner.name;
         existingOwner.phone = req.body.phone || existingOwner.phone;
         existingOwner.notes = req.body.notes || existingOwner.notes;
         const updatedOwner = yield existingOwner.save();
+        const decode = (0, logger_1.getTokenFromHeader)(req);
+        // Log details
+        const type = "update";
+        const userType = decode ? decode.type : 'Guest';
+        const userId = decode ? decode.userId : '';
+        const path = `/car/${existingOwner._id}`;
+        try {
+            yield (0, logger_1.saveLog)(type, message, userType, userId, path);
+        }
+        catch (logError) {
+            console.error("Failed to save log:", logError);
+        }
         res.status(201).send(existingOwner);
     }
     catch (err) {
@@ -69,7 +97,7 @@ router.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 }));
 // Delete 
-router.delete('/:id', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.delete('/:id', tokenAuth_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const ownerId = req.params.id;
     try {
         const isReferenced = yield car_1.default.exists({ ownerId: ownerId });
@@ -81,6 +109,19 @@ router.delete('/:id', (req, res, next) => __awaiter(void 0, void 0, void 0, func
         if (!deletedOwner) {
             res.status(404).json({ error: 'Owner not found' });
             return;
+        }
+        const decode = (0, logger_1.getTokenFromHeader)(req);
+        // Log details
+        const type = "delete";
+        const message = `${deletedOwner}`;
+        const userType = decode ? decode.type : 'Guest';
+        const userId = decode ? decode.userId : '';
+        const path = `/car/${deletedOwner._id}`;
+        try {
+            yield (0, logger_1.saveLog)(type, message, userType, userId, path);
+        }
+        catch (logError) {
+            console.error("Failed to save log:", logError);
         }
         res.status(200).json({ message: 'Owner deleted successfully' });
     }

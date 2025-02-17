@@ -12,15 +12,14 @@ const userRoute_1 = __importDefault(require("./routes/userRoute"));
 const carRoute_1 = __importDefault(require("./routes/carRoute"));
 const carTrackingRoute_1 = __importDefault(require("./routes/carTrackingRoute"));
 const ownerRoute_1 = __importDefault(require("./routes/ownerRoute"));
-const cookie_parser_1 = __importDefault(require("cookie-parser"));
+const logRoutes_1 = __importDefault(require("./routes/logRoutes"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT;
 //Use JSON body parser before session
 app.use(body_parser_1.default.json());
 app.use(express_1.default.json());
-app.use((0, cookie_parser_1.default)()); // Middleware to parse cookies
-app.use((0, cors_1.default)());
+app.use((0, cors_1.default)()); // Allow cookies
 // MongoDB Connection
 (0, connectDB_1.default)();
 app.use((req, res, next) => {
@@ -31,6 +30,7 @@ app.use('/api/user', userRoute_1.default);
 app.use('/api/car', carRoute_1.default);
 app.use('/api/tracking', carTrackingRoute_1.default);
 app.use('/api/owner', ownerRoute_1.default);
+app.use('/api/log', logRoutes_1.default);
 app.use((req, res) => {
     res.status(404).json({ success: false, message: 'Route not found' });
 });

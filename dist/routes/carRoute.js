@@ -15,32 +15,61 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const car_1 = __importDefault(require("../models/car"));
 const carTracking_1 = __importDefault(require("../models/carTracking"));
+const logger_1 = require("../utils/logger");
+const tokenAuth_1 = __importDefault(require("../middlewares/tokenAuth"));
 const router = (0, express_1.Router)();
-// post
-router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// Post route to add a new car
+router.post('/', tokenAuth_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const newCar = new car_1.default(req.body);
         const savedCar = yield newCar.save();
-        res.status(201).send(savedCar);
+        const decode = (0, logger_1.getTokenFromHeader)(req);
+        // Log details
+        const type = "insert";
+        const message = `${newCar}`;
+        const userType = decode ? decode.type : 'Guest';
+        const userId = decode ? decode.userId : '';
+        const path = `/car/${newCar._id}`;
+        try {
+            yield (0, logger_1.saveLog)(type, message, userType, userId, path);
+        }
+        catch (logError) {
+            console.error("Failed to save log:", logError);
+        }
+        res.status(201).json(savedCar);
     }
     catch (err) {
-        res.status(500).send(err);
+        console.error("Error adding car:", err);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 }));
 // put
-router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.put('/:id', tokenAuth_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const existingCar = yield car_1.default.findById(req.params.id);
         if (!existingCar) {
             res.status(404).json({ 'error': 'Car not found' });
             return;
         }
+        const message = `${existingCar} `;
         existingCar.code = req.body.code || existingCar.code;
         existingCar.type = req.body.type || existingCar.type;
         existingCar.description = req.body.description || existingCar.description;
         existingCar.date = req.body.date || existingCar.date;
         existingCar.ownerId = req.body.ownerId || existingCar.ownerId;
-        const updatedOwner = yield existingCar.save();
+        const updatedCar = yield existingCar.save();
+        const decode = (0, logger_1.getTokenFromHeader)(req);
+        // Log details
+        const type = "update";
+        const userType = decode ? decode.type : 'Guest';
+        const userId = decode ? decode.userId : '';
+        const path = `/car/${existingCar._id}`;
+        try {
+            yield (0, logger_1.saveLog)(type, message, userType, userId, path);
+        }
+        catch (logError) {
+            console.error("Failed to save log:", logError);
+        }
         res.status(201).send(existingCar);
     }
     catch (err) {
@@ -84,7 +113,7 @@ router.get('/owner/:id', (req, res) => __awaiter(void 0, void 0, void 0, functio
     }
 }));
 // Delete 
-router.delete('/:id', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.delete('/:id', tokenAuth_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const CarId = req.params.id;
     try {
         const isReferenced = yield carTracking_1.default.exists({ carId: CarId });
@@ -96,6 +125,19 @@ router.delete('/:id', (req, res, next) => __awaiter(void 0, void 0, void 0, func
         if (!deletedCar) {
             res.status(404).json({ error: 'Car not found' });
             return;
+        }
+        const decode = (0, logger_1.getTokenFromHeader)(req);
+        // Log details
+        const type = "delete";
+        const message = `${deletedCar}`;
+        const userType = decode ? decode.type : 'Guest';
+        const userId = decode ? decode.userId : '';
+        const path = `/car/${deletedCar._id}`;
+        try {
+            yield (0, logger_1.saveLog)(type, message, userType, userId, path);
+        }
+        catch (logError) {
+            console.error("Failed to save log:", logError);
         }
         res.status(200).json({ message: 'Car deleted successfully' });
     }
