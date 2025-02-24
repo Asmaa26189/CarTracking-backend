@@ -49,6 +49,15 @@ router.put('/:id', tokenAuth, async (req: Request, res: Response): Promise<void>
     existingCar.description = req.body.description || existingCar.description;
     existingCar.date = req.body.date || existingCar.date;
     existingCar.ownerId = req.body.ownerId || existingCar.ownerId;
+    existingCar.brand = req.body.brand || existingCar.brand;
+    existingCar.model = req.body.model || existingCar.model;
+    existingCar.year = req.body.year || existingCar.year;
+    existingCar.color = req.body.color || existingCar.color;
+    existingCar.engineNumber = req.body.engineNumber || existingCar.engineNumber;
+    existingCar.chassisNumber = req.body.chassisNumber || existingCar.chassisNumber;
+    existingCar.fuel = req.body.fuel || existingCar.fuel;
+    existingCar.mileage = req.body.mileage || existingCar.mileage;
+    existingCar.insurance = req.body.insurance || existingCar.insurance;
 
     const updatedCar = await existingCar.save();
     
