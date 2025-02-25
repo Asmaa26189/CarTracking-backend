@@ -16,7 +16,7 @@ export interface ICar {
   fuel: string;
   mileage: number;
   // lastMaintenance: Date;
-  insurance: string;
+  // insurance: string;
   
 }
 
@@ -36,7 +36,7 @@ const CarSchema: Schema = new Schema({
   fuel: { type: String, required: true },
   mileage: { type: Number, required: true },
   // lastMaintenance: { type: Date, required: true ,default: Date.now },
-  insurance: { type: String, required: true },
+  // insurance: { type: String, required: true },
 });
 
 export default model<ICar>('Car', CarSchema);
