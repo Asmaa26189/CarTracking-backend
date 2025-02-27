@@ -52,12 +52,12 @@ router.put('/:id', tokenAuth, async (req: Request, res: Response): Promise<void>
     existingCar.brand = req.body.brand || existingCar.brand;
     existingCar.model = req.body.model || existingCar.model;
     existingCar.year = req.body.year || existingCar.year;
-    existingCar.color = req.body.color || existingCar.color;
+    // existingCar.color = req.body.color || existingCar.color;
     existingCar.engineNumber = req.body.engineNumber || existingCar.engineNumber;
     existingCar.chassisNumber = req.body.chassisNumber || existingCar.chassisNumber;
     existingCar.fuel = req.body.fuel || existingCar.fuel;
     existingCar.mileage = req.body.mileage || existingCar.mileage;
-    existingCar.insurance = req.body.insurance || existingCar.insurance;
+    // existingCar.insurance = req.body.insurance || existingCar.insurance;
 
     const updatedCar = await existingCar.save();
     

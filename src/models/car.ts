@@ -10,7 +10,7 @@ export interface ICar {
   brand: string;
   model: string;
   year: number;
-  color: string;
+  // color: string;
   engineNumber: string;
   chassisNumber: string;
   fuel: string;
@@ -30,7 +30,7 @@ const CarSchema: Schema = new Schema({
   brand: { type: String, required: true },
   model: { type: String, required: true },
   year: { type: Number, required: true },
-  color: { type: String, required: true },
+  // color: { type: String, required: true },
   engineNumber: { type: String, required: true },
   chassisNumber: { type: String, required: true },
   fuel: { type: String, required: true },
